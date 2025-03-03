@@ -3,154 +3,216 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lendly Feed</title>
+    <title>Feed</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/script/authcheck.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
       body {
-        font-family: Arial, sans-serif;
         background-color: #f8f9fa;
       }
-      .card {
-        margin-bottom: 20px;
+      .post-card {
+        border-radius: 12px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease-in-out;
       }
-      .comment-section {
-        border-top: 1px solid #ddd;
-        padding-top: 10px;
+      .post-card:hover {
+        transform: translateY(-3px);
+      }
+      .btn-custom {
+        background-color: #1769ff;
+        color: white;
+        border-radius: 8px;
+      }
+      .btn-custom:hover {
+        background-color: #125acc;
       }
     </style>
   </head>
   <body>
     <div class="container mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <a href="home.html" class="btn btn-light">&#8592;</a>
-            <h2 class="text-center">📢 Lendly Feed</h2>
-            <a href="home.html" class="btn btn-light">&#10006;</a>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="home.html" class="btn btn-outline-secondary">&#8592; Back</a>
+        <div class="d-flex align-items-center gap-3">
+          <img src="/assets/images/lendlylogo.svg" alt="Logo" height="40" />
+          <h1 class="text-primary fw-bold">Social</h1>
         </div>
-
-      <div class="card p-3">
-        <form id="postForm" class="d-flex">
-          <input
-            type="text"
-            id="newPost"
-            class="form-control me-2"
-            placeholder="What's on your mind?"
-            required
-          />
-          <button type="submit" class="btn btn-primary">Post</button>
-        </form>
+        <a href="home.html" class="btn btn-outline-danger">&#10006;</a>
       </div>
 
+      <!-- Post Creation Section -->
+      <div id="post-section" class="card p-4 mb-4 d-none">
+        <h4 class="mb-3">Create a Post</h4>
+        <textarea
+          id="post-content"
+          class="form-control mb-3"
+          rows="3"
+          placeholder="Write something..."
+        ></textarea>
+        <button class="btn btn-custom w-100" onclick="createPost()">
+          Post
+        </button>
+      </div>
+
+      <!-- Feed Section -->
       <div id="posts"></div>
     </div>
-    <div id="navbar-container"></div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script>
-      async function fetchPosts() {
-        try {
-          const response = await fetch(
-            "https://mylendly.onrender.com/api/posts",
-            { method: "GET", headers: { "Content-Type": "application/json" } }
-          );
-          if (!response.ok)
-            throw new Error(`HTTP Error! Status: ${response.status}`);
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyBp-yQNpQMxcEXbq91-H85OakivJrj_fmw",
+        authDomain: "lendly-authenticate.firebaseapp.com",
+        projectId: "lendly-authenticate",
+        storageBucket: "lendly-authenticate.firebasestorage.app",
+        messagingSenderId: "300875265100",
+        appId: "1:300875265100:web:6c7977a6af3e88e4c670e9",
+        measurementId: "G-5W542FR5HL",
+      };
 
-          const posts = await response.json();
-          document.getElementById("posts").innerHTML = posts
-            .map(
-              (post) => `
-                <div class="card">
-                  <div class="card-body">
-                    <h5 class="card-title">${post.user}</h5>
-                    <p class="card-text">${post.text}</p>
-                    <small class="text-muted">${new Date(
-                      post.createdAt
-                    ).toLocaleString()}</small>
-                    
-                    <div class="comment-section mt-3">
-                      <input type="text" id="comment-${
-                        post._id
-                      }" class="form-control mb-2" placeholder="Add a comment..." />
-                      <button class="btn btn-sm btn-outline-primary" onclick="addComment('${
-                        post._id
-                      }')">Comment</button>
-                      
-                      <div class="mt-2">
-                        ${post.comments
-                          .map(
-                            (comment) =>
-                              `<div><strong>${comment.user}:</strong> ${comment.text}</div>`
-                          )
-                          .join("")}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              `
-            )
-            .join("");
-        } catch (error) {
-          console.error("Error fetching posts:", error);
-        }
-      }
+      // Initialize Firebase
+      const app = firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore(); // Initialize Firestore
+      function createPost() {
+        const postContent = document.getElementById("post-content").value;
+        const user = auth.currentUser;
 
-      async function addComment(postId) {
-        const commentText = document.getElementById(`comment-${postId}`).value;
-        if (!commentText.trim()) return;
-
-        try {
-          await fetch(
-            "https://mylendly.onrender.com/api/posts/" + postId + "/comment",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ text: commentText, user: "Anonymous" }),
-            }
-          );
-          document.getElementById(`comment-${postId}`).value = "";
-          fetchPosts();
-        } catch (error) {
-          console.error("Error adding comment:", error);
-        }
-      }
-
-      document
-        .getElementById("postForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const newPost = document.getElementById("newPost").value;
-          if (!newPost.trim()) return;
-
-          try {
-            await fetch("https://mylendly.onrender.com/api/posts", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ text: newPost, user: "Anonymous" }),
+        if (user) {
+          db.collection("users")
+            .doc(user.uid)
+            .get()
+            .then((doc) => {
+              if (doc.exists) {
+                const userName = doc.data().fullName;
+                db.collection("posts")
+                  .add({
+                    content: postContent,
+                    uid: user.uid,
+                    fullName: userName,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                  })
+                  .then(() => {
+                    alert("Post created!");
+                    document.getElementById("post-content").value = "";
+                    loadPosts();
+                  });
+              }
             });
-            document.getElementById("newPost").value = "";
-            fetchPosts();
-          } catch (error) {
-            console.error("Error posting:", error);
-          }
-        });
+        } else {
+          alert("Please login to post");
+        }
+      }
 
-      fetchPosts();
+      function formatTimestamp(timestamp) {
+        if (!timestamp) return "Unknown time";
+        const date = timestamp.toDate();
+        return date.toLocaleString(); // แสดงวันที่และเวลาในรูปแบบที่อ่านง่าย
+      }
 
-      function loadNavbar() {
-        fetch("/components/navbar.html")
-          .then((response) => response.text())
-          .then((html) => {
-            document.getElementById("navbar-container").innerHTML = html;
-          })
-          .catch((error) => {
-            console.error("Error loading the navbar:", error);
+      function loadPosts() {
+        const postsDiv = document.getElementById("posts");
+        postsDiv.innerHTML = "";
+
+        db.collection("posts")
+          .orderBy("timestamp", "desc")
+          .onSnapshot((snapshot) => {
+            postsDiv.innerHTML = "";
+            snapshot.forEach((doc) => {
+              const postData = doc.data();
+              const postId = doc.id;
+              const displayName = postData.fullName || "Anonymous";
+              const postTime = formatTimestamp(postData.timestamp);
+
+              const postElement = document.createElement("div");
+              postElement.classList.add("card", "mb-3", "p-3");
+              postElement.innerHTML = `
+                <h5>${displayName}</h5>
+                <p>${postData.content}</p>
+                <small class="text-muted">Posted on: ${postTime}</small>
+                <textarea id="comment-${postId}" class="form-control mt-2" placeholder="Write a comment..."></textarea>
+                <button class="btn btn-sm btn-outline-primary mt-2" onclick="postComment('${postId}')">Comment</button>
+                <div id="comments-${postId}" class="mt-2"></div>
+            `;
+              postsDiv.appendChild(postElement);
+
+              loadComments(postId);
+            });
           });
       }
-      loadNavbar();
+
+      function postComment(postId) {
+        const commentInput = document.getElementById(`comment-${postId}`);
+        const commentText = commentInput.value;
+        const user = auth.currentUser;
+
+        if (user && commentText.trim() !== "") {
+          db.collection("users")
+            .doc(user.uid)
+            .get()
+            .then((doc) => {
+              if (doc.exists) {
+                const userName = doc.data().fullName || "Unknown User";
+                db.collection("posts")
+                  .doc(postId)
+                  .collection("comments")
+                  .add({
+                    content: commentText,
+                    uid: user.uid,
+                    fullName: userName,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                  })
+                  .then(() => {
+                    alert("Comment posted!");
+                    commentInput.value = "";
+                    loadComments(postId);
+                  });
+              }
+            });
+        } else {
+          alert("Please login and write a comment");
+        }
+      }
+
+      function loadComments(postId) {
+        const commentsDiv = document.getElementById(`comments-${postId}`);
+        commentsDiv.innerHTML = "";
+
+        db.collection("posts")
+          .doc(postId)
+          .collection("comments")
+          .orderBy("timestamp", "desc")
+          .onSnapshot((snapshot) => {
+            commentsDiv.innerHTML = "";
+            snapshot.forEach((doc) => {
+              const commentData = doc.data();
+              const displayName = commentData.fullName || "Unknown User";
+              const commentTime = formatTimestamp(commentData.timestamp);
+
+              const commentElement = document.createElement("div");
+              commentElement.innerHTML = `
+                <p><strong>${displayName}</strong>: ${commentData.content} <br>
+                <small class="text-muted">Commented on: ${commentTime}</small></p>
+            `;
+              commentsDiv.appendChild(commentElement);
+            });
+          });
+      }
+
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          document.getElementById("post-section").classList.remove("d-none");
+          loadPosts();
+        } else {
+          document.getElementById("post-section").classList.add("d-none");
+        }
+      });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
