@@ -127,57 +127,70 @@
         });
 
         async function displayContent(userId, sectionName) {
-            const sectionElement = document.getElementById(sectionName);
-            sectionElement.innerHTML = `<p>Loading ${sectionName}...</p>`;
+    const sectionElement = document.getElementById(sectionName);
+    sectionElement.innerHTML = `<p>Loading ${sectionName}...</p>`;
 
-            try {
-                const querySnapshot = await db.collection('users').doc(userId).collection(sectionName).get();
-                sectionElement.innerHTML = '';
+    try {
+        console.log(`Fetching data for userId: ${userId}, section: ${sectionName}`);
+        
+        const querySnapshot = await db.collection('users').doc(userId).collection(sectionName).get();
+        console.log(`Fetched ${querySnapshot.size} documents from ${sectionName}`);
 
-                if (querySnapshot.empty) {
-                    sectionElement.innerHTML = `
-                        <div class="d-flex flex-column align-items-center pt-4">
-                            <h1>Sorry, Nothing Here in ${sectionName}</h1>
-                            <img src="/assets/images/Nologo.svg" alt="No Logo">
-                        </div>`;
-                    return;
-                }
+        sectionElement.innerHTML = '';
 
-                const container = document.createElement('div');
-                container.className = 'container mt-4';
-                container.innerHTML = `<h3>Your ${sectionName}</h3>`;
-
-                const row = document.createElement('div');
-                row.className = 'row row-cols-1 row-cols-md-3 g-4';
-
-                querySnapshot.forEach((doc) => {
-                    const item = doc.data();
-                    const col = document.createElement('div');
-                    col.className = 'col';
-
-                    col.innerHTML = `
-                        <div class="card h-100">
-                            <img src="${item.imageUrl}" class="card-img-top" alt="${item.title}" style="height: 200px; object-fit: cover;">
-                            <div class="card-body">
-                                <h5 class="card-title">${item.title}</h5>
-                                <p class="card-text">${item.description || 'No description available'}</p>
-                                <p class="card-text"><strong>Price: $${item.price || 'N/A'}</strong></p>
-                                <div class="d-flex justify-content-between">
-                                    <a href="itemdetail.html?id=${item.id}&title=${encodeURIComponent(item.title)}&description=${encodeURIComponent(item.description)}&price=${item.price}" class="btn btn-primary">View Details</a>
-                                    <button class="btn btn-danger" onclick="removeItem('${userId}', '${sectionName}', '${item.id}', this)">Remove</button>
-                                </div>
-                            </div>
-                        </div>`;
-                    row.appendChild(col);
-                });
-
-                container.appendChild(row);
-                sectionElement.appendChild(container);
-            } catch (error) {
-                sectionElement.innerHTML = `<p>Error loading ${sectionName}: ${error.message}</p>`;
-                console.error(`Error loading ${sectionName}:`, error);
-            }
+        if (querySnapshot.empty) {
+            console.warn(`No data found in ${sectionName}`);
+            sectionElement.innerHTML = `
+                <div class="d-flex flex-column align-items-center pt-4">
+                    <h1>Sorry, Nothing Here in ${sectionName}</h1>
+                    <img src="/assets/images/Nologo.svg" alt="No Logo">
+                </div>`;
+            return;
         }
+
+        const container = document.createElement('div');
+        container.className = 'container mt-4';
+        container.innerHTML = `<h3>Your ${sectionName}</h3>`;
+
+        const row = document.createElement('div');
+        row.className = 'row row-cols-1 row-cols-md-3 g-4';
+
+        querySnapshot.forEach((doc) => {
+            const item = doc.data();
+            console.log(`Rendering item: ${JSON.stringify(item)}`);
+
+            if (!item.imageUrl || !item.title) {
+                console.warn("Incomplete item data:", item);
+                return;
+            }
+
+            const col = document.createElement('div');
+            col.className = 'col';
+
+            col.innerHTML = `
+                <div class="card h-100">
+                    <img src="${item.imageUrl}" class="card-img-top" alt="${item.title}" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">${item.title}</h5>
+                        <p class="card-text">${item.description || 'No description available'}</p>
+                        <p class="card-text"><strong>Price: $${item.price || 'N/A'}</strong></p>
+                        <div class="d-flex justify-content-between">
+                            <a href="itemdetail.html?id=${item.id}&title=${encodeURIComponent(item.title)}&description=${encodeURIComponent(item.description)}&price=${item.price}" class="btn btn-primary">View Details</a>
+                            <button class="btn btn-danger" onclick="removeItem('${userId}', '${sectionName}', '${item.id}', this)">Remove</button>
+                        </div>
+                    </div>
+                </div>`;
+            row.appendChild(col);
+        });
+
+        container.appendChild(row);
+        sectionElement.appendChild(container);
+
+    } catch (error) {
+        sectionElement.innerHTML = `<p>Error loading ${sectionName}: ${error.message}</p>`;
+        console.error(`Error loading ${sectionName}:`, error);
+    }
+}
 
         function removeItem(userId, collectionName, itemId, buttonElement) {
     // Step 1: Remove from the user's sub-collection (e.g., onborrow)
