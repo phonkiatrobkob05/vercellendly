@@ -266,7 +266,10 @@
 
                 document.getElementById("lenderForm").addEventListener("submit", function(event) {
                 event.preventDefault(); // ป้องกันการส่งฟอร์มแบบปกติ
-                // window.location.href = "favorite.html#mylent"; // Redirect ไปหน้า favorite และไปที่ ID mylent
+                alert("ทำของให้ยืมสำเร็จ !");
+                setTimeout(function () {
+                    window.location.href = "favorite.html#mylent";
+                }, 3000)
                 });
 
 /*////////////////////////เพิ่ม card ใน mylent//////////////////////////////*/

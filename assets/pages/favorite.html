@@ -27,9 +27,13 @@
       .active a {
         color: white;
         background-color: #007bff;
+        border-radius: 4px;
+        padding-top: 1px;
+        padding-bottom: 1.2px;
+ 
       }
 
-      nav ul li a:hover {
+      nav ul li:hover {
         background-color: #cccccc;
         color: white;
       }
@@ -427,6 +431,7 @@
 
           // ✅ Remove the card from the UI
           cardElement.remove();
+          location.reload();
         } catch (error) {
           console.error("Failed to delete item:", error);
         }
