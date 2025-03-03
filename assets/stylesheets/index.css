@@ -1,0 +1,9 @@
+
+a {
+    text-decoration: none;   /* Removes underline */
+    color: #000000;          /* Custom color for the link */
+}
+a:hover {
+    text-decoration: none;   /* Removes underline */
+    color: #ffffff;          /* Custom color for the link */
+}

@@ -1,0 +1,157 @@
+/* * {
+    margin: 0;
+    padding: 0;
+} */
+
+/* .container {
+    max-width: 400px;
+    margin: auto;
+    padding: 20px;
+} */
+ 
+.report-box {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    background: #f8f9fa;
+    border-radius: 20px;
+    padding: 15px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+.report-box textarea {
+    border: none;
+    width: 100%;
+    background: transparent;
+    resize: none;
+    outline: none;
+    font-size: 16px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+}
+
+.container {
+    width: 100vw;
+    height: 100vh;
+    background: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 20px;
+    gap: 20px;
+}
+
+.header {
+    width: 100vw;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    padding: 16px;
+    background-color: #f8f9fa;
+    gap: 30px;
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding-left: 24px;
+    padding-bottom: 1px;
+}
+
+.icon {
+    width: 32px;
+    transition: opacity 0.3s;
+}
+
+.icon:hover {
+    opacity: 0.7;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.content {
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 16px;
+}
+
+.menu-button {
+    width: 60%;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background 0.3s;
+}
+
+.menu-button:hover {
+    background: #e0e0e0;
+}
+
+.arrow {
+    width: 24px;
+    transform: scaleX(-1);
+}
+
+a {
+    text-decoration: none;   /* Removes underline */
+    color: #324eff;          /* Custom color for the link */
+}
+
+.paraFirst {
+    display: flex;
+    direction: wrap;
+    width: 100vw;
+    align-items: center;
+    justify-content: center;
+}
+
+.paraSecond {
+    display: flex;
+    direction: row;
+    justify-content: center;
+    font-size: 14px;
+    font-family: 'Inter';
+
+}
+
+.paraThird {
+    display: flex;
+    direction: row;
+    justify-content: center;
+    font-size: 14px;
+    font-family: 'Inter';
+    padding-top: 64px;
+    padding-right: 36px;
+}
+
+

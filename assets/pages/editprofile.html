@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Profile</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script> <!-- Separate Config File -->
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+              window.location.href = "login.html";
+            } else {
+              const userDocRef = db.collection("users").doc(user.uid);
+              const doc = await userDocRef.get();
+              if (doc.exists) {
+                const userData = doc.data();
+                document.getElementById("userNamedisplay").textContent =
+                  userData.fullName || "User";
+                document.getElementById("userEmailDisplay").textContent =
+                  userData.email || "N/A";
+              } else {
+                console.error("No such document!");
+              }
+            }
+          });
+        } catch (error) {
+          console.error("Error loading user data:", error);
+        }
+      });
+    </script>
+    <style>
+      .profile-container {
+        max-width: 400px;
+        margin: auto;
+        text-align: center;
+        padding: 20px;
+      }
+      .profile-pic {
+        position: relative;
+        display: inline-block;
+      }
+      .profile-pic img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 3px solid #007bff;
+      }
+      .edit-icon {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        background: #007bff;
+        color: white;
+        border-radius: 50%;
+        padding: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body class="bg-light">
+    <div class="container profile-container">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="profile.html" class="btn btn-light">&#8592;</a>
+        <h5 class="m-0">Edit Profile</h5>
+        <button class="btn btn-light">Save</button>
+      </div>
+      <div class="profile-pic">
+        <img
+          src="/assets/images/moodenggggg.webp"
+          alt="Profile Picture"
+        />
+        <span class="edit-icon">✏️</span>
+      </div>
+      <form id="editProfileForm" class="mt-4">
+        <div class="mb-3">
+          <label class="form-label d-flex">Name</label>
+          <input type="text" class="form-control" placeholder="New Name" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label d-flex">Username</label>
+          <input type="text" class="form-control" placeholder="New Username" />
+        </div>
+        <div class="mb-3">
+          <label for="gender" class="form-label d-flex">Gender</label>
+          <select id="gender" class="form-select">
+            <option selected>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="faculty" class="form-label d-flex">Faculty</label>
+          <select id="faculty" class="form-select">
+            <option>คณะวิศวกรรมศาสตร์</option>
+            <option>คณะสถาปัตยกรรม ศิลปะและการออกแบบ</option>
+            <option>คณะครุศาสตร์อุตสาหกรรมและเทคโนโลยี</option>
+            <option>คณะเทคโนโลยีการเกษตร</option>
+            <option>คณะวิทยาศาสตร์</option>
+            <option>คณะเทคโนโลยีสารสนเทศ</option>
+            <option>คณะอุตสาหกรรมอาหาร</option>
+            <option>วิทยาลัยเทคโนโลยีและนวัตกรรมวัสดุ</option>
+            <option>วิทยาลัยนวัตกรรมการผลิตขั้นสูง</option>
+            <option>คณะบริหารธุรกิจ</option>
+            <option>วิทยาลัยอุตสาหกรรมการบินนานาชาติ</option>
+            <option>คณะศิลปศาสตร์</option>
+            <option>คณะแพทยศาสตร์</option>
+            <option>คณะทันตแพทยศาสตร์</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label d-flex">Phone</label>
+          <input type="text" class="form-control" placeholder="Telephone number" />
+        </div>
+        <button type="submit" class="btn btn-primary w-100 mt-3">Save Changes</button>
+      </form>
+    </div>
+
+    <script>
+      document.getElementById("editProfileForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const updatedData = {
+          fullName: document.getElementById("fullName").value,
+          username: document.getElementById("username").value,
+          gender: document.getElementById("gender").value,
+          faculty: document.getElementById("faculty").value,
+          phone: document.getElementById("phone").value,
+        };
+
+        try {
+          await db.collection("users").doc(user.uid).update(updatedData);
+          alert("Profile updated successfully!");
+          window.location.href = "profile.html";
+        } catch (error) {
+          console.error("Error updating profile:", error);
+        }
+      });
+    </script>
+  </body>
+</html>

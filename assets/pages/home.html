@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="../stylesheets/home.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lendly</title>
+</head>
+<body>
+    <div class="Header__logo d-flex justify-content-between p-4">
+        <img src="../images/logo.svg" alt="Lendly Logo" class="w-12" />
+    </div>
+    
+    <div class="gap-3 p-4" style="background-color: #5194FF;">
+        <div class="d-flex justify-content-center align-items-center gap-5">
+            <div class="subheader__text text-light">
+                <h1 class="fw-bold">Lendly</h1>
+                <p class="h4 text-light">
+                    - Lend it. Borrow it. <br />
+                    - Love it.
+                </p>
+            </div>
+            <div class="subheader__image">
+                <img src="../images/lendborrowlogo.svg" alt="Lend and Borrow" class="w-30" />
+            </div>
+        </div>
+    </div>  
+    <div class="d-flex justify-content-between ">
+        <div class="p-4 fw-bold">
+            <h2>Ready to Borrow</h2>
+        </div>
+        <div class="p-4">
+            <button class="btn" style="background-color: #1769FF; color: aliceblue;">Upload</button>
+        </div>
+    </div>  
+    <div class="container">
+        <!-- Section for displaying products -->
+        <div id="product-list" class="row">
+            <!-- Data from the API will be injected here -->
+        </div>
+        <div class="container">
+            <div class="swiper mySwiper">
+                <div class="swiper-wrapper">
+                    <!-- <div class="swiper-slide">
+                        
+                    </div> -->
+
+                    <!-- <div class="swiper-slide">
+            <img src="../images/unclelee.jpg" alt="" />
+          </div>
+          <div class="swiper-slide">
+            <img src="../images/unclelee.jpg" alt="" />
+          </div>
+          <div class="swiper-slide">
+            <img src="../images/unclelee.jpg" alt="" />
+          </div>
+          <div class="swiper-slide">
+            <img src="../images/unclelee.jpg" alt="" />
+          </div>
+          <div class="swiper-slide">
+            <img src="../images/unclelee.jpg" alt="" />
+          </div>
+          <div class="swiper-slide">
+            <img src="../images/unclelee.jpg" alt="" />
+          </div>
+          <div class="swiper-slide">
+            <img src="../images/unclelee.jpg" alt="" />
+          </div>
+        </div> -->
+                    <div class="swiper-pagination"></div>
+                </div>
+
+                <!-- Swiper JS -->
+                <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+                <!-- Initialize Swiper -->
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        try {
+                            fetchData();
+                            var a = localStorage.getItem("firebase:authUser:AIzaSyBp-yQNpQMxcEXbq91-H85OakivJrj_fmw:[DEFAULT]"	
+)
+                        } catch (error) {
+                            console.log(error);
+                        }
+                    });
+
+                    // กำหนด data ไว้ที่ระดับ global เพื่อให้ใช้งานได้ถูกต้อง
+                    var data = [];
+
+                    async function fetchData() {
+                        try {
+                            // ดึงข้อมูลสินค้า
+                            const res = await fetch("https://lendly-backend.onrender.com/api/product");
+                            const dataText = await res.json();
+
+                            // ดึงข้อมูลรูปภาพ
+                            const resImage = await fetch("https://lendly-backend.onrender.com/api/image");
+                            const dataImage = await resImage.json();
+
+                            // รวมข้อมูลสินค้าและรูปภาพเข้าด้วยกัน (กรณีเป็น Array)
+                            data = dataText.map((product) => {
+                            // เก็บ productId จาก product ปัจจุบัน
+                            const productId = product.productId;
+                            
+                            // แสดงข้อมูลเพื่อการตรวจสอบ
+                            console.log(`หาการจับคู่สำหรับ product ID: ${productId} (ประเภท: ${typeof productId})`);
+                            
+                            // หารูปภาพที่ตรงกับ productId โดยแปลงเป็นสตริงทั้งคู่
+                            const matchingImage = dataImage.find(image => String(image.productId) === String(productId));
+                            
+                            if (matchingImage) {
+                                console.log(`พบรูปภาพที่ตรงกัน: ${matchingImage.imageUrl}`);
+                            } else {
+                                console.log(`ไม่พบรูปภาพที่ตรงกับ ID: ${productId}`);
+                            }
+                            
+                            const result = {
+                                ...product,
+                            imageUrl: matchingImage ? matchingImage.imageUrl : 'default-image-url.jpg',
+                            _id: matchingImage ? matchingImage._id : null // กำหนด _id ใหม่ ถ้าเจอการจับคู่
+                            };
+                            
+                            return result;
+                        });
+ 
+                            console.log('Combined data:', data);
+
+                            renderData(data);
+                        } catch (error) {
+                            console.error('Fetch data error:', error);
+                        }
+                    }
+
+                    // ฟังก์ชันสำหรับสร้าง Card แสดงข้อมูล
+                    function renderData(data) {
+                        const swiperWrapper = document.querySelector('.swiper-wrapper');
+                        swiperWrapper.innerHTML = ''; // ล้างข้อมูลเก่าออกก่อน
+
+                        data.forEach(product => {
+                            // Create a swiper-slide div
+                            var slide = document.createElement('div');
+                            slide.classList.add('swiper-slide');
+                            
+                            
+                            // Create an anchor tag to make it clickable
+                            var link = document.createElement('a');
+                            link.href = `itemdetail.html?id=${product._id}&title=${encodeURIComponent(product.title)}&description=${encodeURIComponent(product.description || "No description")}&price=${product.price || 'N/A'}&file=${encodeURIComponent(product.imageUrl)}`;
+                            link.classList.add('text-decoration-none'); // Remove underline
+
+                            // Create a card div inside the link
+                            var card = document.createElement('div');
+                            card.classList.add('card', 'h-50');
+
+                            // Create the image element
+                            var image = document.createElement('img');
+                            image.src = product.imageUrl; // ใช้ URL จาก Cloudinary
+                            image.alt = product.title;
+                            image.classList.add('card-img-top');
+
+                            // Create the card body
+                            var cardBody = document.createElement('div');
+                            cardBody.classList.add('card-body');
+
+                            // Create the title element
+                            var title = document.createElement('h5');
+                            title.classList.add('card-title');
+                            title.textContent = product.title;
+
+                            // Create the description element
+                            var description = document.createElement('p');
+                            description.classList.add('card-text');
+                            description.textContent = product.description || "No description available";
+
+                            // Create a price element
+                            var price = document.createElement('p');
+                            price.classList.add('card-text');
+                            price.textContent = `Price: $${product.price || 'N/A'}`;
+
+                            // Append elements
+                            cardBody.appendChild(title);
+                            cardBody.appendChild(description);
+                            cardBody.appendChild(price);
+                            card.appendChild(image);
+                            card.appendChild(cardBody);
+                            link.appendChild(card);
+                            slide.appendChild(link);
+                            swiperWrapper.appendChild(slide);
+                        });
+                    }
+
+
+                    var swiper = new Swiper(".mySwiper", {
+                        slidesPerView: 3,
+                        spaceBetween: 30,
+                        loop: true, // Enable looping
+                        autoplay: {
+                            delay: 2500, // Slide transition delay
+                            disableOnInteraction: false, // Continue autoplay after interaction
+                        },
+                        simulateTouch: true, // Enable swiping with mouse or touch
+                        touchStartPreventDefault: true, // Allow swiping even if you start on a clickable element
+                        breakpoints: {
+                            // Adjust slides per view for smaller screens
+                            640: {
+                                slidesPerView: 1, // On small screens, show 1 slide
+                            },
+                            768: {
+                                slidesPerView: 2, // On medium screens, show 2 slides
+                            },
+                            1024: {
+                                slidesPerView: 3, // On large screens, show 3 slides
+                            },
+                        },
+                    });
+
+                    document.addEventListener('DOMContentLoaded', function () {
+
+                        // Fetch and load the navbar from components/navbar.html
+                        function loadNavbar() {
+                            fetch('/components/navbar.html')
+                                .then(response => response.text())
+                                .then(html => {
+                                    document.getElementById('navbar-container').innerHTML = html;
+                                })
+                                .catch(error => {
+                                    console.error('Error loading the navbar:', error);
+                                });
+                        }
+
+                        loadNavbar(); // Load the navbar into the placeholder
+
+                        // Get all the navigation links
+                        const navItems = document.querySelectorAll('nav .nav-link');
+
+                        // Function to highlight the active navigation link
+                        function highlightActiveNavLink() {
+                            const currentPath = window.location.pathname; // Get the current URL path
+                            navItems.forEach(item => {
+                                // Check if the href attribute matches the current page
+                                if (currentPath.includes(item.getAttribute('href'))) {
+                                    item.classList.add('active'); // Add 'active' class to highlight
+                                } else {
+                                    item.classList.remove('active'); // Remove 'active' class if not the current page
+                                }
+                            });
+                        }
+
+                        // Call the function to highlight the active navbar item
+                        highlightActiveNavLink();
+
+                    });
+                </script>
+                <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+                <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+                <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+                <script>
+                    // Hide content until authentication is verified
+                   // Hide content until authentication is verified
+        document.body.style.display = "none";
+
+// Your Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyBp-yQNpQMxcEXbq91-H85OakivJrj_fmw",
+    authDomain: "lendly-authenticate.firebaseapp.com",
+    projectId: "lendly-authenticate",
+    storageBucket: "lendly-authenticate.firebasestorage.app",
+    messagingSenderId: "300875265100",
+    appId: "1:300875265100:web:6c7977a6af3e88e4c670e9",
+    measurementId: "G-5W542FR5HL"
+};
+
+// Initialize Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// Authentication check
+auth.onAuthStateChanged((user) => {
+    if (!user) {
+        // Redirect unauthenticated users to login
+        window.location.replace("login.html");
+    } else {
+        // Show the page content once authentication is verified
+        document.body.style.display = "block";
+
+        // Load user data
+        const userDocRef = db.collection('users').doc(user.uid);
+        userDocRef.get().then((doc) => {
+            if (doc.exists) {
+                const userData = doc.data();
+                document.getElementById('userNamedisplay').textContent = userData.fullName;
+                document.getElementById('userEmailDisplay').textContent = userData.email;
+            } else {
+                console.log("No such document!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+    }
+});
+/*/////////////////////////////////////////////////////////////////////////////*/
+            // ฟังก์ชันสำหรับสร้าง Card แสดงข้อมูล
+    function renderData(data) {
+    const swiperWrapper = document.querySelector('.swiper-wrapper');
+    swiperWrapper.innerHTML = ''; // ล้างข้อมูลเก่าออกก่อน
+
+    data.forEach(product => {
+        // Create a swiper-slide div
+        var slide = document.createElement('div');
+        slide.classList.add('swiper-slide');
+
+        // Create a card div
+        var card = document.createElement('div');
+        card.classList.add('card', 'h-100');
+
+        // Create the image element
+        var image = document.createElement('img');
+        image.src = product.imageUrl;
+        image.alt = product.title;
+        image.classList.add('card-img-top');
+
+        // Create the card body
+        var cardBody = document.createElement('div');
+        cardBody.classList.add('card-body');
+
+        // Create the title element
+        var title = document.createElement('h5');
+        title.classList.add('card-title');
+        title.textContent = product.title;
+
+        // Create the description element
+        var description = document.createElement('p');
+        description.classList.add('card-text');
+        description.textContent = product.description || "No description available";
+
+        // Create a price element
+        var price = document.createElement('p');
+        price.classList.add('card-text');
+        price.textContent = `Price: $${product.price || 'N/A'}`;
+
+        // Create a "Borrow" button
+        var borrowButton = document.createElement('button');
+        borrowButton.textContent = 'Borrow';
+        borrowButton.classList.add('btn', 'btn-primary', 'w-100');
+        borrowButton.onclick = function () {
+            borrowItem(product);
+        };
+
+        // Append elements
+        cardBody.appendChild(title);
+        cardBody.appendChild(description);
+        cardBody.appendChild(price);
+        cardBody.appendChild(borrowButton);
+        card.appendChild(image);
+        card.appendChild(cardBody);
+        slide.appendChild(card);
+        swiperWrapper.appendChild(slide);
+    });
+    }
+
+
+
+
+
+
+
+function renderData(data) {
+    const swiperWrapper = document.querySelector('.swiper-wrapper');
+    swiperWrapper.innerHTML = ''; // Clear previous data
+
+    data.forEach(product => {
+        var slide = document.createElement('div');
+        slide.classList.add('swiper-slide');
+        
+        var link = document.createElement('a');
+        link.href = `itemdetail.html?id=${product._id}&title=${encodeURIComponent(product.title)}&description=${encodeURIComponent(product.description || "No description")}&price=${product.price || 'N/A'}&file=${encodeURIComponent(product.imageUrl)}`;
+        link.classList.add('text-decoration-none');
+
+        var card = document.createElement('div');
+        card.classList.add('card', 'h-50');
+
+        var image = document.createElement('img');
+        image.src = product.imageUrl;
+        image.alt = product.title;
+        image.classList.add('card-img-top');
+
+        var cardBody = document.createElement('div');
+        cardBody.classList.add('card-body');
+
+        var title = document.createElement('h5');
+        title.classList.add('card-title');
+        title.textContent = product.title;
+
+        var description = document.createElement('p');
+        description.classList.add('card-text');
+        description.textContent = product.description || "No description available";
+
+        var price = document.createElement('p');
+        price.classList.add('card-text');
+        price.textContent = `Price: $${product.price || 'N/A'}`;
+
+        // Create a favorite button
+        var favButton = document.createElement('button');
+        favButton.textContent = 'Add to Favorites';
+        favButton.classList.add('btn', 'btn-warning');
+        favButton.onclick = function () {
+            addToFavorites(product);
+        };
+
+        cardBody.appendChild(title);
+        cardBody.appendChild(description);
+        cardBody.appendChild(price);
+        cardBody.appendChild(favButton);
+        card.appendChild(image);
+        card.appendChild(cardBody);
+        link.appendChild(card);
+        slide.appendChild(link);
+        swiperWrapper.appendChild(slide);
+    });
+}
+
+
+                </script>
+            </div>
+
+            <div id="navbar-container"></div>
+
+</body>
+
+</html>

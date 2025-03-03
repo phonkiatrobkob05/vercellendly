@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/assets/stylesheets/register.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBp-yQNpQMxcEXbq91-H85OakivJrj_fmw",
+            authDomain: "lendly-authenticate.firebaseapp.com",
+            projectId: "lendly-authenticate",
+            storageBucket: "lendly-authenticate.firebasestorage.app",
+            messagingSenderId: "300875265100",
+            appId: "1:300875265100:web:6c7977a6af3e88e4c670e9",
+            measurementId: "G-5W542FR5HL"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore(); // Initialize Firestore
+    </script>
+    <title>Lendly</title>
+</head>
+
+<body>
+    <div class="d-flex flex-column min-vh-100 justify-content-center align-items-center pt-4">
+        <div class="d-flex justify-content-center align-items-center gap-4">
+            <img src="../images/lendlylogo.svg" alt="Lendly logo" />
+            <h1 class="fw-semibold fs-1 fs-sm-2">
+                Lendly
+            </h1>
+        </div>
+
+        <div class="mt-3 mb-3 font-[Inter]">กรุณาลงทะเบียน</div>
+        <h2 class="text-center mb-4 fs-2 fw-bold">Register</h2>
+
+        <form id="registerForm" class="d-flex flex-column gap-3">
+
+            <div class="mb-3">
+                <label htmlFor="studentID" class="form-label text-muted">Student ID</label>
+                <input type="text" id="studentID" placeholder="Student ID" class="form-control" required
+                    name="studentID" />
+            </div>
+
+            <div class="mb-3">
+                <label htmlFor="fullName" class="form-label text-muted">Full Name</label>
+                <input type="text" id="fullName" placeholder="Enter Full Name" class="form-control" required
+                    name="fullName" />
+            </div>
+
+            <div class="mb-3">
+                <label htmlFor="faculty" class="form-label text-muted">Faculty</label>
+                <select id="faculty" class="form-select" required name="faculty">
+                    <option value="" disabled>Select your faculty</option>
+                    <option value="Architecture">Architecture, Art and Design</option>
+                    <option value="AgriTech">Agricultural and Technology</option>
+                    <option value="Business">Business</option>
+                    <option value="Dentistry">Dentistry</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="FoodIndus">Food Industry</option>
+                    <option value="InformTech">Information Technology</option>
+                    <option value="IndusEdu">Industrial Education and Technology</option>
+                    <option value="IntInnTech">Integrated Innovative Technology</option>
+                    <option value="LibArt">Liberal Arts</option>
+                    <option value="Medicine">Medicine</option>
+                    <option value="Nursing">Nursing</option>
+                    <option value="Science">Science</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label htmlFor="email" class="form-label text-muted">Email</label>
+                <input class="form-control" type="email" id="email" placeholder="Input your e-mail" required
+                    name="email" />
+            </div>
+
+            <div class="mb-3">
+                <label htmlFor="password" class="form-label text-muted">Password</label>
+                <input class="form-control" type="password" id="password" placeholder="Input your password" required
+                    name="password" />
+            </div>
+
+            <div class="mb-3">
+                <label htmlFor="confirmPassword" class="form-label text-muted">Confirm Password</label>
+                <input class="form-control" type="password" id="confirmPassword" placeholder="Enter your password"
+                    required name="confirmPassword" />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mt-3">Submit</button>
+        </form>
+
+        <div id="successMessage" class="alert alert-success mt-3" style="display: none;">
+            Registration successful! Redirecting to login page...
+        </div>
+
+        <div class="mt-3 text-center">
+            Already have an account?
+            <a href="login.html" class="text-primary">Login here!</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('registerForm');
+        const successMessage = document.getElementById('successMessage');
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const fullName = document.getElementById('fullName').value;
+            const studentID = document.getElementById('studentID').value;
+            const faculty = document.getElementById('faculty').value;
+
+            if (password !== confirmPassword) {
+                alert("Passwords do not match.");
+                return;
+            }
+
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // Store user data in Firestore
+                await db.collection('users').doc(user.uid).set({
+                    fullName: fullName,
+                    email: email,
+                    studentID: studentID,
+                    faculty: faculty
+                });
+
+                successMessage.style.display = 'block';
+                setTimeout(function () {
+                    window.location.href = 'login.html';
+                }, 3000);
+            } catch (error) {
+                console.error("Error registering user:", error);
+                alert("Registration failed: " + error.message);
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,22 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+ul {
+    list-style: none;
+    /* Removes dots */
+    padding: 0;
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+    /* Removes underline */
+    color: #000000;
+    /* Custom color for the link */
+}
+.nav-link.active {
+    font-weight: bold;
+    color: blue;
+}

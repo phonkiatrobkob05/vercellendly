@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item Details Form</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBp-yQNpQMxcEXbq91-H85OakivJrj_fmw",
+            authDomain: "lendly-authenticate.firebaseapp.com",
+            projectId: "lendly-authenticate",
+            storageBucket: "lendly-authenticate.firebasestorage.app",
+            messagingSenderId: "300875265100",
+            appId: "1:300875265100:web:6c7977a6af3e88e4c670e9",
+            measurementId: "G-5W542FR5HL"
+        };
+    
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    
+        // Wait for DOM to load before initializing Firebase logic
+        document.addEventListener('DOMContentLoaded', function () {
+            // Authentication check
+            auth.onAuthStateChanged((user) => {
+                if (!user) {
+                    // User is not logged in, redirect to login page
+                    window.location.href = "login.html";
+                } else {
+                    // User is logged in, continue loading the page
+                    // ... rest of your profile page logic ...
+                    const userDocRef = db.collection('users').doc(user.uid);
+                    userDocRef.get().then((doc) => {
+                        if (doc.exists) {
+                            const userData = doc.data();
+                            // Ensure the DOM elements exist before trying to access them
+                            const userNamedisplay = document.getElementById('userNamedisplay');
+                            const userEmailDisplay = document.getElementById('userEmailDisplay');
+                            
+                            if (userNamedisplay && userEmailDisplay) {
+                                userNamedisplay.textContent = userData.fullName;
+                                userEmailDisplay.textContent = userData.email;
+                            } else {
+                                console.log("Error: DOM elements not found");
+                            }
+                        } else {
+                            console.log("No such document!");
+                        }
+                    }).catch((error) => {
+                        console.log("Error getting document:", error);
+                    });
+                }
+            });
+        });
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/assets/stylesheets/upload.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="w-100 d-flex justify-content-between align-items-center" >
+                <a class="icon-button" onclick="window.history.back();">
+                        <img src="/assets/images/backButton.svg" alt="Back" class="icon" />
+                </a>
+                
+                <div style="font-size: 32px;">Post to Lend</div>
+
+                <a class="icon-button" href="/assets/pages/profile.html" style="opacity: 0;">
+                    <img
+                      src="/assets/images/closeButton.svg"
+                      alt="Close"
+                      class="icon"
+                    />
+                  </a>
+    
+            </div>
+        </div>
+
+        <div class="container d-flex flex-column align-items-center">
+
+            <form id="lenderForm">
+                <h5>รายละเอียดผู้ให้ยืม</h5>
+                <div class="text-temp form-box" style="padding-bottom: 30px;">
+                    <label for="lenderName" style="padding-bottom: 2px;">ชื่อผู้ให้ยืม</label>
+                    <input type="text" id="lenderName" name="lenderName" placeholder="Enter lender's name" required>
+                </div>
+                <div class="text-temp form-box">
+                    <h5>รายละเอียดสินค้า</h5>
+                    <label for="title" style="padding-bottom: 2px;">Title:</label>
+                    <input type="text" id="title" name="title" placeholder="Enter item title" required>
+                </div>
+
+                <div class="text-temp form-box">
+                    <label for="description" style="padding-bottom: 2px;">Description:</label>
+                    <input class="" type="text" id="description" name="description" placeholder="Enter item description" required>
+                </div>
+
+                <div class="text-temp form-box">
+                    <label for="image" style="padding-bottom: 2px;">File (Image):</label>
+                    <input type="file" id="file" name="file" accept="image/*" required>
+                </div>
+
+                <div class="text-temp form-box">
+                    <label for="genre" style="padding-bottom: 2px;">Genre:</label>
+                    <select id="genre" name="genre" required>
+                        <option value="">Select Genre</option>
+                        <option value="Action">Electronics</option>
+                        <option value="Drama">Clothes</option>
+                        <option value="Comedy">Tools</option>
+                        <option value="Adventure">Accessories</option>
+                        <option value="Horror">Beauty</option>
+                        <option value="Horror">Other</option>
+
+                    </select>
+                </div>
+
+
+
+                <div class="text-temp form-box">
+                    <label for="price" style="padding-bottom: 2px;">Price:</label>
+                    <input type="number" id="price" name="price" placeholder="Enter price" required>
+                </div>
+
+                <div class="text-temp form-box">
+                    <label for="mainLocation" style="padding-bottom: 2px;">Main Location:</label>
+                    <select id="mainLocation" name="mainLocation" required>
+                        <option value="">Select Main Location</option>
+                        <option value="Engineer">Engineer</option>
+                        <option value="Science">Science</option>
+                        <option value="Arts">Arts</option>
+                    </select>
+                </div>
+
+                <div class="text-temp form-box">
+                    <label for="subLocation" style="padding-bottom: 2px;">Sub Location:</label>
+                    <select id="subLocation" name="subLocation" disabled required>
+                        <option value="">Select Main Location First</option>
+                    </select>
+                </div>
+
+                
+                <div style="justify-items: center;">
+                    <div style="padding-top: 20px; padding-bottom: 20px;">
+                        <button type="submit" 
+                                class="btn btn-primary" 
+                                style="padding: 6px;">
+                                Submit</button>
+                    </div>
+                </div>
+            </form>
+            <script>
+                const SubLos = {
+                    Engineer: [
+                        {value: "a", text: "โรง A"},
+                        {value: "b", text: "โรง B"},
+                        {value: "c", text: "โรง C"},
+                    ],
+                    Science: [
+                        {value: "z", text: "1"},
+                        {value: "x", text: "2"},
+                        {value: "c", text: "3"},
+                    ],
+                    Arts: [
+                        {value: "pat", text: "สถาปัตฯ"},
+                        {value: "b", text: "5"},
+                        {value: "n", text: "6"},
+                    ]
+                }
+
+                const MainLo = document.getElementById("mainLocation");
+                const SubLo = document.getElementById("subLocation");
+
+                MainLo.addEventListener("change",function() {
+                    const selectedLocation = this.value;
+
+                    SubLo.innerHTML = '<option value="">Sub Location</option>';
+
+                    if (selectedLocation) {
+                        SubLos[selectedLocation].forEach(item => {
+                            const option = document.createElement("option");
+                            option.value = item.value;
+                            option.textContent = item.text;
+                            SubLo.appendChild(option);
+                        });
+
+                        SubLo.disabled = false;
+                    } else {
+                        SubLo.disabled = true;
+                    }
+                });
+
+                
+                document.getElementById('lenderForm').addEventListener('submit',async function(e){
+                e.preventDefault()
+                const formData = new FormData();
+                const formDataImage = new FormData();
+
+                // เพิ่มค่าลงใน FormData
+                formData.append('title', document.getElementById('title').value);
+                formData.append('description', document.getElementById('description').value);
+                formData.append('genre', document.getElementById('genre').value);
+                formData.append('price', document.getElementById('price').value);
+                formData.append('mainLocation', document.getElementById('mainLocation').value);
+                formData.append('subLocation', document.getElementById('subLocation').value);
+                
+
+            
+
+                try {
+                    const res = await fetch('https://lendly-backend.onrender.com/api/product', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {}
+                    })
+                    const data = await res.json()
+                    console.log('Product Success:', data);
+
+                    if (!data.productId) {
+                        console.error('No productId returned from API');
+                        return;
+                    }
+
+                    formDataImage.append('image', document.getElementById('file').files[0]);
+                    formDataImage.append('productId', data.productId);
+                        
+                    const resImage = await fetch('https://lendly-backend.onrender.com/api/upload', {
+                        method: 'POST',
+                        body: formDataImage,
+                        headers: {}
+                    })
+                    const dataImage = await resImage.json()
+                    console.log('Image Upload Success:', dataImage);
+                        
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('เกิดข้อผิดพลาดในการส่งข้อมูล');
+                }
+                })
+
+                
+
+                document.getElementById("lenderForm").addEventListener("submit", function(event) {
+                event.preventDefault(); // ป้องกันการส่งฟอร์มแบบปกติ
+                // window.location.href = "favorite.html#mylent"; // Redirect ไปหน้า favorite และไปที่ ID mylent
+                });
+
+/*////////////////////////เพิ่ม card ใน mylent//////////////////////////////*/
+            
+// document.getElementById('lenderForm').addEventListener('submit', async function(e) {
+//     e.preventDefault();
+    
+//     const user = firebase.auth().currentUser;
+//     if (!user) {
+//         alert("Please log in to lend items.");
+//         return;
+//     }
+    
+//     const formData = new FormData();
+//     const formDataImage = new FormData();
+    
+//     // เพิ่มค่าลงใน FormData
+//     formData.append('title', document.getElementById('title').value);
+//     formData.append('description', document.getElementById('description').value);
+//     formData.append('genre', document.getElementById('genre').value);
+//     formData.append('price', document.getElementById('price').value);
+//     formData.append('mainLocation', document.getElementById('mainLocation').value);
+//     formData.append('subLocation', document.getElementById('subLocation').value);
+
+//     try {
+//         const res = await fetch('https://lendly-backend.onrender.com/api/product', {  /*/////////*/
+//             method: 'POST',
+//             body: formData
+//         });
+//         const data = await res.json();
+//         console.log('Product Success:', data);
+
+//         if (!data.productId) {
+//             console.error('No productId returned from API');
+//             return;
+//         }
+
+//         // อัปโหลดรูปภาพ
+//         formDataImage.append('image', document.getElementById('file').files[0]);
+//         formDataImage.append('productId', data.productId);
+        
+//         const resImage = await fetch('https://lendly-backend.onrender.com/api/upload', {
+//             method: 'POST',
+//             body: formDataImage
+//         });
+//         const dataImage = await resImage.json();
+//         console.log('Image Upload Success:', dataImage);
+
+//         // 📌 บันทึกข้อมูลลง Firestore
+//         const dbRef = db.collection("users").doc(user.uid).collection("lentItems").doc(data.productId);
+//         await dbRef.set({
+//             productId: data.productId,
+//             title: formData.get("title"),
+//             description: formData.get("description"),
+//             genre: formData.get("genre"),
+//             price: formData.get("price"),
+//             mainLocation: formData.get("mainLocation"),
+//             subLocation: formData.get("subLocation"),
+//             imageUrl: dataImage.imageUrl || "", // เก็บลิงก์รูปที่อัปโหลด
+//             createdAt: firebase.firestore.FieldValue.serverTimestamp()
+//         });
+
+//         alert("Item listed successfully!");
+//         window.location.href = "mylent.html"; // 🔹 ไปที่หน้าดูรายการของที่ให้ยืม <-----------------
+
+//     } catch (error) {
+//         console.error('Error:', error);
+//         alert('เกิดข้อผิดพลาดในการส่งข้อมูล');
+//     }
+// });
+
+
+            </script>
+        </div>
+
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,19 @@
+#item-image {
+    width: 100%; /* Responsive width */
+    aspect-ratio: 1 / 1; /* Keep square shape */
+    object-fit: cover; /* Maintain aspect ratio and crop overflow */
+    border-radius: 8px; /* Optional rounded corners */
+    max-width: 300px; /* Prevent it from being too large on bigger screens */
+}
+button {
+    
+    background: none; /* Optional: Removes background if needed */
+    cursor: pointer; /* Ensures it's still clickable */
+}
+
+/* On smaller screens, allow full width */
+@media (max-width: 768px) {
+    #item-image {
+        max-width: 100%; /* Let it be full width on mobile */
+    }
+}

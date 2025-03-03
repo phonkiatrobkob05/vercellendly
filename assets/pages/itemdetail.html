@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item Details</title>
+    <link rel="stylesheet" href="../stylesheets/itemdetail.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const title = urlParams.get("title");
+            const description = urlParams.get("description");
+            const price = urlParams.get("price");
+            const file = urlParams.get('id');
+            var data = null
+            async function fetchData() {
+                
+                        try {
+                            // ดึงข้อมูลสินค้า
+                            const res = await fetch(`https://lendly-backend.onrender.com/api/image/${file}`);
+                            data = await res.json();
+                            console.log(data.imageUrl);
+                            
+                        }
+                        catch(error){
+                            console.log(error);
+                            
+                        }}
+            
+            
+            
+
+            // Update the page content
+            document.getElementById("item-title").textContent = title;
+            document.getElementById("item-description").textContent = description;
+            document.getElementById("item-price").textContent = `Price: $${price}`;
+            document.getElementById("item-image").src = data.imageUrl ;
+        });
+    </script> -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBp-yQNpQMxcEXbq91-H85OakivJrj_fmw",
+            authDomain: "lendly-authenticate.firebaseapp.com",
+            projectId: "lendly-authenticate",
+            storageBucket: "lendly-authenticate.firebasestorage.app",
+            messagingSenderId: "300875265100",
+            appId: "1:300875265100:web:6c7977a6af3e88e4c670e9",
+            measurementId: "G-5W542FR5HL"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Authentication check
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                // User is not logged in, redirect to login page
+                window.location.href = "login.html";
+            } else {
+                // User is logged in, continue loading the page
+                // ... rest of your profile page logic ...
+                const userDocRef = db.collection('users').doc(user.uid);
+                userDocRef.get().then((doc) => {
+                    if (doc.exists) {
+                        const userData = doc.data();
+                        document.getElementById('userNamedisplay').textContent = userData.fullName;
+                        document.getElementById('userEmailDisplay').textContent = userData.email;
+                    } else {
+                        console.log("No such document!");
+                    }
+                }).catch((error) => {
+                    console.log("Error getting document:", error);
+                });
+            }
+        });
+        
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async function() {
+    try {
+        await fetchData(); // เรียกฟังก์ชันพร้อมรอให้ดึงข้อมูลเสร็จ
+        // เพิ่ม event listener ให้กับปุ่ม bookmark หลังจากโหลดข้อมูลเสร็จ
+        const bookmarkBtn = document.querySelector('button#buttonfavorite');
+        const BorrowBtn = document.querySelector('button#buttonBorrow');
+        bookmarkBtn.addEventListener('click', saveToFavorites);
+        BorrowBtn.addEventListener('click', saveToBorrow);
+        // await saveToFavorites()
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+// ฟังก์ชันบันทึกข้อมูลไปยังพื้นที่ Favorites ของ user
+function saveToFavorites() {
+    // ตรวจสอบว่ามีการล็อกอินแล้วหรือไม่
+    const user = auth.currentUser;
+    console.log('dfgfdg',user);
+    
+    if (user) {
+        const userId = user.uid;
+        
+        // ดึงข้อมูลของ item ปัจจุบัน
+        const urlParams = new URLSearchParams(window.location.search);
+        const title = urlParams.get("title");
+        const description = urlParams.get("description");
+        const price = urlParams.get("price");
+        const id = urlParams.get("id");
+        const imageUrl = document.getElementById("item-image").src;
+        
+        // สร้างข้อมูล item ที่จะบันทึก
+        const itemData = {
+            id: id,
+            title: title,
+            description: description,
+            price: price,
+            imageUrl: imageUrl,
+            savedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        // บันทึกข้อมูลไปยัง Firestore ในคอลเลคชัน favorites ของผู้ใช้
+        db.collection('users').doc(userId).collection('favorites').doc(id)
+            .set(itemData)
+            .then(() => {
+                alert("บันทึกไปยัง Library เรียบร้อยแล้ว");
+                
+                // เปลี่ยนสีปุ่มเพื่อแสดงว่าบันทึกแล้ว
+                const bookmarkBtn = document.querySelector('button#buttonfavorite');
+                bookmarkBtn.classList.add('bg-warning');
+                bookmarkBtn.querySelector('img').style.filter = 'brightness(0) invert(1)';
+            })
+            .catch((error) => {
+                console.error("Error adding to favorites: ", error);
+                alert("เกิดข้อผิดพลาดในการบันทึก: " + error.message);
+            });
+        
+            
+    } else {
+        // ถ้ายังไม่ได้ล็อกอิน
+        alert("กรุณาเข้าสู่ระบบก่อนบันทึกรายการโปรด");
+        window.location.href = "login.html";
+    }
+}
+function saveToBorrow() {
+    // ตรวจสอบว่ามีการล็อกอินแล้วหรือไม่
+    const user = auth.currentUser;
+    console.log('dfgfdg',user);
+    
+    if (user) {
+        const userId = user.uid;
+        
+        // ดึงข้อมูลของ item ปัจจุบัน
+        const urlParams = new URLSearchParams(window.location.search);
+        const title = urlParams.get("title");
+        const description = urlParams.get("description");
+        const price = urlParams.get("price");
+        const id = urlParams.get("id");
+        const imageUrl = document.getElementById("item-image").src;
+        
+        // สร้างข้อมูล item ที่จะบันทึก
+        const itemData = {
+            id: id,
+            title: title,
+            description: description,
+            price: price,
+            imageUrl: imageUrl,
+            savedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        // บันทึกข้อมูลไปยัง Firestore ในคอลเลคชัน borrow ของผู้ใช้
+        
+        db.collection('users').doc(userId).collection('onborrow').doc(id)
+            .set(itemData)
+            .then(() => {
+                alert("บันทึกไปยัง Library เรียบร้อยแล้ว");
+                
+                
+                // เปลี่ยนสีปุ่มเพื่อแสดงว่าบันทึกแล้ว
+                const BorrowBtn = document.querySelector('button#buttonBorrow');
+                BorrowBtn.classList.add('bg-danger');
+               ;
+            })
+            .catch((error) => {
+                console.error("Error adding to onborrow: ", error);
+                alert("เกิดข้อผิดพลาดในการบันทึก: " + error.message);
+            });
+        db.collection('users').doc(userId).collection('returned').doc(id)
+            .set(itemData)
+            // .then(() => {
+                
+                
+            //     // เปลี่ยนสีปุ่มเพื่อแสดงว่าบันทึกแล้ว
+            //     const bookmarkBtn = document.querySelector('button[type="button"]');
+            //     bookmarkBtn.classList.add('bg-primary');
+            //     bookmarkBtn.querySelector('img').style.filter = 'brightness(0) invert(1)';
+            // })
+            // .catch((error) => {
+            //     console.error("Error adding to returned: ", error);
+            //     alert("เกิดข้อผิดพลาดในการบันทึก: " + error.message);
+            // });
+    } else {
+        // ถ้ายังไม่ได้ล็อกอิน
+        alert("กรุณาเข้าสู่ระบบก่อนบันทึกรายการโปรด");
+        window.location.href = "login.html";
+    }
+}
+
+
+// ตรวจสอบว่ารายการนี้อยู่ใน favorites หรือไม่
+async function checkIfFavorited() {
+    const user = auth.currentUser;
+    
+    if (user) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get("id");
+        
+        try {
+            const doc = await db.collection('users').doc(user.uid).collection('favorites').doc(id).get();
+            
+            if (doc.exists) {
+                // ถ้ามีอยู่แล้ว ให้เปลี่ยนสีปุ่ม
+                const bookmarkBtn = document.querySelector('button#buttonfavorite');
+                bookmarkBtn.classList.add('bg-warning');
+                bookmarkBtn.querySelector('img').style.filter = 'brightness(0) invert(1)';
+            }
+        } catch (error) {
+            console.error("Error checking favorite status: ", error);
+        }
+    }
+}
+async function checkIfBorrow() {
+    const user = auth.currentUser;
+    
+    if (user) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get("id");
+        
+        try {
+            const doc = await db.collection('users').doc(user.uid).collection('onborrow').doc(id).get();
+        
+            if (doc.exists) {
+                // ถ้ามีอยู่แล้ว ให้เปลี่ยนสีปุ่ม
+                const BorrowBtn = document.querySelector('button#buttonBorrow');
+                BorrowBtn.classList.add('bg-danger');
+                
+        }
+        } catch (error) {
+            console.error("Error checking favorite status: ", error);
+        }
+    }
+}
+
+// แก้ไขฟังก์ชัน fetchData เพื่อเรียกใช้ checkIfFavorited หลังจากโหลดข้อมูลเสร็จ
+async function fetchData() {
+    try {
+        // ดึง URL Parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const title = urlParams.get("title");
+        const description = urlParams.get("description");
+        const price = urlParams.get("price");
+        const id = urlParams.get("id"); // ID ของภาพ
+        
+        // ดึงข้อมูลรูปจาก API
+        const res = await fetch(`https://lendly-backend.onrender.com/api/image/${id}`);
+        const data = await res.json();
+        
+        if (data && data.imageUrl) {
+            // อัปเดตข้อมูลบนหน้าเว็บ
+            document.getElementById("item-title").textContent = title;
+            document.getElementById("item-description").textContent = description;
+            document.getElementById("item-price").textContent = `Price: $${price}`;
+            document.getElementById("item-image").src = data.imageUrl;
+            
+            // หลังจากโหลดข้อมูลเสร็จ ตรวจสอบสถานะ favorite
+            await checkIfFavorited();
+            await checkIfBorrow()
+        } else {
+            console.error("Image URL not found in API response");
+        }
+    } catch (error) {
+        console.error("Error fetching data:", error);
+    }
+}
+
+    </script>
+    
+    
+   
+    
+</head>
+<body>
+    <header class="p-4">
+        <button type="button" onclick="window.history.back();" style="border: none; background: none;">
+            <img src="/assets/images/leftarrow.svg" alt="">
+        </button>
+    </header>
+    <div class="container mt-5 d-flex flex-column align-items-center">
+        <h1 id="item-title" class=""></h1>
+        <img id="item-image" class="img-fluid mb-3" alt="Product Image">
+        <p id="item-description"></p>
+        <h3 id="item-price"></h3>
+        <div  class="d-flex justify-content-center gap-3 align-items-center">
+            <button type="button" class="border border-3 rounded-3" id="buttonfavorite"><img src="/assets/images/bookmark.svg" alt=""></button>
+            <button type="button" class="btn btn-primary border" id="buttonBorrow">Borrow</button>
+
+        </div>
+    </div>
+
+</body>
+</html>
+    

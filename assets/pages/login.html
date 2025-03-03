@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/stylesheets/login.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lendly</title>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBp-yQNpQMxcEXbq91-H85OakivJrj_fmw",
+            authDomain: "lendly-authenticate.firebaseapp.com",
+            projectId: "lendly-authenticate",
+            storageBucket: "lendly-authenticate.firebasestorage.app",
+            messagingSenderId: "300875265100",
+            appId: "1:300875265100:web:6c7977a6af3e88e4c670e9",
+            measurementId: "G-5W542FR5HL"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+    </script>
+    
+</head>
+
+<body>
+    <div class="d-flex flex-column align-items-center vh-100 pt-4">
+        <div class="d-flex align-items-center justify-content-center gap-4">
+            <img src="../images/lendlylogo.svg" alt="Lendly Logo" />
+            <h1 class="fw-semibold display-4">Lendly</h1>
+        </div>
+        <div class="text-center">
+            <h1 class="mt-6 mb-6">กรุณาเข้าสู่ระบบ</h1>
+            <h2 class="h2 fw-bold mb-6">Login</h2>
+        </div>
+
+        <form class="d-flex flex-column gap-4" onsubmit="handleSubmit">
+            <div>
+                <label for="email" class="form-label text-sm fw-medium py-1">
+                    Email
+                </label>
+                <div class="position-relative">
+                    <input class="form-control ps-5" type="email" id="email" placeholder="email" required
+                        name="email" />
+                    <img src="../images/mailicon.svg" alt="emailicon"
+                        class="position-absolute top-50 start-0 translate-middle-y ps-2" />
+                </div>
+            </div>
+            <div>
+                <label for="password" class="form-label text-sm fw-medium py-1">
+                    Password
+                </label>
+                <div class="position-relative">
+                    <input class="form-control mt-1 ps-5" type="password" id="password" placeholder="Password" required
+                        name="password" />
+                    <img src="../images/lockicon.svg" alt="Lock Icon"
+                        class="position-absolute top-50 start-0 translate-middle-y ps-2" />
+                    <a type="button" onclick="togglePasswordVisibility()"
+                        class="position-absolute top-50 end-0 translate-middle-y pe-2" id="togglePassword">
+                        <img src="../images/eye.svg" alt="Show Password" />
+                    </a>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-4 w-100 cursor-pointer">
+                Login
+            </button>
+        </form>
+        <div class="d-flex mt-auto py-4">
+            <p class="text-center">Don't have an account? &nbsp;</p>
+            <a href="/assets/pages/register.html" class="text-center"> Register here </a>
+        </div>
+    </div>
+
+    <!-- Link to external JS file placed before the closing body tag -->
+    <script src="/assets/script/login.js"></script>
+    
+</body>
+
+</html>
