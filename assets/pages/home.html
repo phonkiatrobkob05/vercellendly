@@ -43,7 +43,7 @@
             <h2>Ready to Borrow</h2>
         </div>
         <div class="p-4">
-            <a href="/assets/pages/upload.html" style="background-color: #1769FF; color: aliceblue;">Upload</a>
+            <a class="border border-1 border-primary p-2 rounded-3 " href="/assets/pages/upload.html" style=" color: black; text-decoration: none;">Upload</a>
         </div>
     </div>  
     <div class="container">
@@ -204,7 +204,7 @@
 
 
                     var swiper = new Swiper(".mySwiper", {
-                        slidesPerView: 3,
+                        slidesPerView: 2,
                         spaceBetween: 30,
                         loop: true, // Enable looping
                         autoplay: {
@@ -216,10 +216,10 @@
                         breakpoints: {
                             // Adjust slides per view for smaller screens
                             640: {
-                                slidesPerView: 1, // On small screens, show 1 slide
+                                slidesPerView: 3, // On small screens, show 1 slide
                             },
                             768: {
-                                slidesPerView: 2, // On medium screens, show 2 slides
+                                slidesPerView: 3, // On medium screens, show 2 slides
                             },
                             1024: {
                                 slidesPerView: 3, // On large screens, show 3 slides
@@ -436,8 +436,8 @@ function renderData(data) {
 
                 </script>
             </div>
-
-            <div id="navbar-container"></div>
+            
+            <div id="navbar-container" class=""></div>
 
 </body>
 
