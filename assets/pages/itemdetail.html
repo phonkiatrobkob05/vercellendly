@@ -87,6 +87,7 @@
         document.addEventListener("DOMContentLoaded", async function() {
     try {
         await fetchData(); // เรียกฟังก์ชันพร้อมรอให้ดึงข้อมูลเสร็จ
+        await checkIfBorrowed();
         // เพิ่ม event listener ให้กับปุ่ม bookmark หลังจากโหลดข้อมูลเสร็จ
         const bookmarkBtn = document.querySelector('button#buttonfavorite');
         const BorrowBtn = document.querySelector('button#buttonBorrow');
@@ -149,22 +150,18 @@ function saveToFavorites() {
     }
 }
 function saveToBorrow() {
-    // ตรวจสอบว่ามีการล็อกอินแล้วหรือไม่
     const user = auth.currentUser;
-    console.log('dfgfdg',user);
     
     if (user) {
         const userId = user.uid;
-        
-        // ดึงข้อมูลของ item ปัจจุบัน
         const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get("id");
+        
         const title = urlParams.get("title");
         const description = urlParams.get("description");
         const price = urlParams.get("price");
-        const id = urlParams.get("id");
         const imageUrl = document.getElementById("item-image").src;
-        
-        // สร้างข้อมูล item ที่จะบันทึก
+
         const itemData = {
             id: id,
             title: title,
@@ -173,41 +170,35 @@ function saveToBorrow() {
             imageUrl: imageUrl,
             savedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
-        
-        // บันทึกข้อมูลไปยัง Firestore ในคอลเลคชัน borrow ของผู้ใช้
-        
-        db.collection('users').doc(userId).collection('onborrow').doc(id)
-            .set(itemData)
-            .then(() => {
-                alert("บันทึกไปยัง Library เรียบร้อยแล้ว");
-                
-                
-                // เปลี่ยนสีปุ่มเพื่อแสดงว่าบันทึกแล้ว
-                const BorrowBtn = document.querySelector('button#buttonBorrow');
-                BorrowBtn.classList.add('bg-danger');
-               ;
-            })
-            .catch((error) => {
-                console.error("Error adding to onborrow: ", error);
-                alert("เกิดข้อผิดพลาดในการบันทึก: " + error.message);
-            });
-        db.collection('users').doc(userId).collection('returned').doc(id)
-            .set(itemData)
-            // .then(() => {
-                
-                
-            //     // เปลี่ยนสีปุ่มเพื่อแสดงว่าบันทึกแล้ว
-            //     const bookmarkBtn = document.querySelector('button[type="button"]');
-            //     bookmarkBtn.classList.add('bg-primary');
-            //     bookmarkBtn.querySelector('img').style.filter = 'brightness(0) invert(1)';
-            // })
-            // .catch((error) => {
-            //     console.error("Error adding to returned: ", error);
-            //     alert("เกิดข้อผิดพลาดในการบันทึก: " + error.message);
-            // });
+
+        db.collection('items').doc(id).get().then((doc) => {
+            if (doc.exists && doc.data().borrowerId) {
+                alert("สินค้าถูกยืมแล้ว ไม่สามารถยืมได้");
+            } else {
+                db.collection('items').doc(id).set({
+                    borrowerId: userId,
+                    savedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true })
+                .then(() => {
+                    return db.collection('users').doc(userId).collection('onborrow').doc(id).set(itemData);
+                })
+                .then(() => {
+                    alert("ยืมสินค้าเรียบร้อยแล้ว");
+                    const borrowBtn = document.getElementById('buttonBorrow');
+                    borrowBtn.classList.add('bg-danger');
+                    borrowBtn.textContent = "Remove";
+                    borrowBtn.onclick = removeBorrow;
+                })
+                .catch((error) => {
+                    console.error("Error borrowing item: ", error);
+                    alert("เกิดข้อผิดพลาดในการยืม: " + error.message);
+                });
+            }
+        }).catch((error) => {
+            console.error("Error checking item status: ", error);
+        });
     } else {
-        // ถ้ายังไม่ได้ล็อกอิน
-        alert("กรุณาเข้าสู่ระบบก่อนบันทึกรายการโปรด");
+        alert("กรุณาเข้าสู่ระบบก่อนยืมสินค้า");
         window.location.href = "login.html";
     }
 }
@@ -235,27 +226,61 @@ async function checkIfFavorited() {
         }
     }
 }
-async function checkIfBorrow() {
+async function checkIfBorrowed() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get("id");
     const user = auth.currentUser;
     
-    if (user) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const id = urlParams.get("id");
+    try {
+        const doc = await db.collection('items').doc(id).get();
         
-        try {
-            const doc = await db.collection('users').doc(user.uid).collection('onborrow').doc(id).get();
-        
-            if (doc.exists) {
-                // ถ้ามีอยู่แล้ว ให้เปลี่ยนสีปุ่ม
-                const BorrowBtn = document.querySelector('button#buttonBorrow');
-                BorrowBtn.classList.add('bg-danger');
-                
+        if (doc.exists && doc.data().borrowerId) {
+            const borrowerId = doc.data().borrowerId;
+            const borrowBtn = document.getElementById('buttonBorrow');
+            
+            if (user && user.uid === borrowerId) {
+                borrowBtn.classList.add('bg-danger');
+                borrowBtn.textContent = "Remove";
+                borrowBtn.onclick = removeBorrow;
+            } else {
+                borrowBtn.disabled = true;
+                borrowBtn.textContent = "Not Available";
+                borrowBtn.classList.add('bg-secondary');
+            }
         }
-        } catch (error) {
-            console.error("Error checking favorite status: ", error);
-        }
+    } catch (error) {
+        console.error("Error checking borrow status: ", error);
     }
 }
+function removeBorrow() {
+    const user = auth.currentUser;
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get("id");
+
+    if (user) {
+        db.collection('items').doc(id).update({
+            borrowerId: firebase.firestore.FieldValue.delete()
+        }).then(() => {
+            return db.collection('users').doc(user.uid).collection('onborrow').doc(id).delete();
+        }).then(() => {
+            alert("ลบการยืมสินค้าเรียบร้อยแล้ว");
+            const borrowBtn = document.getElementById('buttonBorrow');
+            borrowBtn.classList.remove('bg-danger', 'bg-secondary');
+            borrowBtn.classList.add('btn-primary');
+            borrowBtn.textContent = "Borrow";
+            borrowBtn.onclick = saveToBorrow;
+            borrowBtn.disabled = false;
+
+            // รีเฟรชการแสดงผล
+            checkIfBorrowed(); 
+        }).catch((error) => {
+            console.error("Error removing borrow status: ", error);
+            alert("เกิดข้อผิดพลาดในการลบสถานะยืม: " + error.message);
+        });
+    }
+}
+
+
 
 // แก้ไขฟังก์ชัน fetchData เพื่อเรียกใช้ checkIfFavorited หลังจากโหลดข้อมูลเสร็จ
 async function fetchData() {
@@ -280,7 +305,7 @@ async function fetchData() {
             
             // หลังจากโหลดข้อมูลเสร็จ ตรวจสอบสถานะ favorite
             await checkIfFavorited();
-            await checkIfBorrow()
+            await checkIfBorrowed()
         } else {
             console.error("Image URL not found in API response");
         }
